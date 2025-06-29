@@ -6,28 +6,20 @@ jobs:
   run-sanity-tests:
     runs-on: ubuntu-latest
 
+    container: docker://ghcr.io/iterative/cml:0-dvc2-base1
+
     steps:
     - uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
-
-    - name: Install dependencies
       run: |
-        pip install -r requirements.txt
-        pip install "cml==0.10.0"
+        apt-get update && apt-get install -y python3 python3-pip
+        pip3 install -r requirements.txt
 
     - name: Train model
-      run: |
-        python train.py
+      run: python3 train.py
 
-    - name: Run tests
-      run: |
-        pytest tests/ --junitxml=result.xml
-
-    - name: Report with CML
+    - name: Run tests and post report
       env:
         REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
