@@ -6,23 +6,27 @@ jobs:
   run-sanity-tests:
     runs-on: ubuntu-latest
 
-    container: docker://ghcr.io/iterative/cml:0-dvc2-base1
-
     steps:
     - uses: actions/checkout@v4
 
     - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
       run: |
-        apt-get update && apt-get install -y python3 python3-pip
-        pip3 install -r requirements.txt
+        pip install --upgrade pip
+        pip install -r requirements.txt
 
     - name: Train model
-      run: python3 train.py
+      run: python train.py
 
     - name: Run tests and post report
       env:
         REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
+        pip install pytest
         echo "## 🧪 Pytest Results" > report.md
         pytest tests/ --tb=short --disable-warnings >> report.md
-        cml comment create report.md
+        npx cml comment create report.md
